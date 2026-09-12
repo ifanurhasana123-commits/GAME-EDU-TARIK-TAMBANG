@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarik Tambang LHO — Bahasa Indonesia SMK Kelas X</title>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#223055; --red:#e5484d; --red-dk:#b3242f; --yellow:#ffd447;
+    --blue:#2f7fc1; --paper:#fffdf7; --grass:#5aa64b; --grass-dk:#468a39;
+    --sky:#a8dcff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{min-height:100%;}
+  body{
+    font-family:'Nunito',sans-serif; color:var(--ink); overflow-x:hidden;
+    background:linear-gradient(#8ed1ff 0%, #c8ecff 46%, #e9f7ff 100%);
+  }
+  [hidden]{display:none !important;}
+  button{font-family:inherit;}
+  button:focus-visible{outline:3px solid var(--yellow); outline-offset:2px;}
+
+  /* ===== AWAN & LATAR ===== */
+  .cloud{position:fixed; z-index:0; background:#fff; border-radius:60px; opacity:.85; pointer-events:none;
+    animation:drift linear infinite;}
+  .cloud::before,.cloud::after{content:""; position:absolute; background:#fff; border-radius:50%;}
+  .cloud::before{width:55%;height:150%; left:12%; top:-70%;}
+  .cloud::after{width:40%;height:110%; right:12%; top:-40%;}
+  @keyframes drift{from{transform:translateX(-180px);}to{transform:translateX(110vw);}}
+
+  /* ===== BUNTING BENDERA ===== */
+  .bunting{position:fixed; top:0; left:0; right:0; z-index:40; pointer-events:none;
+    display:flex; justify-content:center; gap:6px; padding-top:5px;
+    border-top:6px solid #9a6b3f;
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.15));}
+  .flag{width:34px; height:30px; clip-path:polygon(0 0,100% 0,50% 100%);
+    transform-origin:top center; animation:sway 2.8s ease-in-out infinite alternate;}
+  @keyframes sway{from{transform:rotate(-4deg);}to{transform:rotate(4deg);}}
+
+  /* ===== TOPBAR ===== */
+  .topbar{position:relative; z-index:5; display:flex; align-items:center; justify-content:space-between;
+    gap:10px; max-width:1020px; margin:0 auto; padding:34px 16px 4px;}
+  .topbar .brand{font-family:'Lilita One'; font-size:clamp(16px,3vw,22px); letter-spacing:1px;
+    color:var(--red-dk); text-shadow:2px 2px 0 #fff;}
+  .topbar .brand small{display:block; font-family:'Nunito'; font-weight:900; font-size:11px;
+    letter-spacing:3px; color:var(--ink); text-shadow:none;}
+  #muteBtn{background:var(--paper); border:3px solid var(--ink); border-radius:50%; width:44px; height:44px;
+    font-size:18px; cursor:pointer; box-shadow:0 4px 0 var(--ink); transition:.15s;}
+  #muteBtn:hover{transform:translateY(-2px);}
+  #muteBtn:active{transform:translateY(2px); box-shadow:0 1px 0 var(--ink);}
+
+  /* ===== STAGE ===== */
+  .stage{position:relative; z-index:2; max-width:1020px; margin:0 auto; padding:8px 14px 48px;
+    display:flex; flex-direction:column; gap:14px;}
+
+  .card{background:var(--paper); border:3px solid var(--ink); border-radius:16px;
+    box-shadow:0 6px 0 rgba(34,48,85,.9); padding:16px;}
+
+  /* ===== SCOREBAR ===== */
+  .scorebar{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:12px 18px;}
+  .side{display:flex; align-items:center; gap:10px; font-weight:900;}
+  .side .emoji{font-size:30px;}
+  .score{font-family:'Lilita One'; font-size:34px; min-width:44px; text-align:center;
+    background:var(--ink); color:var(--yellow); border-radius:12px; padding:2px 8px;
+    box-shadow:0 3px 0 rgba(0,0,0,.25);}
+  .side-l b{color:var(--red-dk);} .side-r b{color:var(--blue);}
+  .mid{display:flex; flex-direction:column; align-items:center; gap:6px;}
+  .qcount{font-family:'Lilita One'; letter-spacing:2px; font-size:15px;}
+  .dots{display:flex; gap:7px;}
+  .dot{width:16px;height:16px;border-radius:50%; border:2.5px solid var(--ink); background:#fff;
+    display:grid; place-items:center; font-size:9px; font-weight:900; color:#fff; transition:.3s;}
+  .dot.ok{background:#2f9e44;} .dot.ok::after{content:"✔";}
+  .dot.no{background:var(--red);} .dot.no::after{content:"✖";}
+
+  /* ===== ARENA ===== */
+  .arena{position:relative; height:300px; overflow:hidden; padding:0; border-width:4px;
+    background:linear-gradient(#9ed9ff 0%, #d6f0ff 56%, var(--grass) 56%, var(--grass-dk) 100%);
+    user-select:none;}
+  .arena::after{content:""; position:absolute; inset:56% 0 0 0; pointer-events:none;
+    background:repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 3px, transparent 3px 46px);}
+  .crowd{position:absolute; left:0; right:0; top:40%; text-align:center; font-size:21px; letter-spacing:9px;
+    opacity:.8; pointer-events:none; z-index:1;}
+  .crowd span{display:inline-block; animation:idle 2s ease-in-out infinite;}
+  .vline{position:absolute; top:7%; height:47%; border-left:3px dashed rgba(255,255,255,.85); z-index:1;}
+  .vline span{position:absolute; top:-24px; left:-11px; font-size:17px;}
+  .pit{position:absolute; left:37%; right:37%; bottom:7%; height:34px; z-index:1;
+    background:radial-gradient(ellipse at center, #7c5233 0%, #5c3a20 70%, transparent 72%);}
+  .center-line{position:absolute; left:50%; top:50%; bottom:6%; border-left:3px dashed rgba(255,255,255,.9); z-index:2;}
+  .rope{position:absolute; left:-30px; right:-30px; top:60%; height:12px; z-index:3;
+    border:2px solid #6d4526; border-radius:8px;
+    background:repeating-linear-gradient(115deg, #d9a05f 0 9px, #b97e3f 9px 18px);
+    transition:transform .85s cubic-bezier(.25,.9,.3,1.15);}
+  .ribbon{position:absolute; left:50%; top:50%; width:30px; height:40px; transform:translate(-50%,-50%);
+    filter:drop-shadow(0 2px 1px rgba(0,0,0,.3)); animation:flutter 1.4s ease-in-out infinite;}
+  .ribbon::before{content:""; position:absolute; inset:0; background:var(--red);
+    clip-path:polygon(0 0,100% 0,100% 100%,50% 72%,0 100%);}
+  .ribbon::after{content:""; position:absolute; left:50%; top:-4px; width:12px; height:12px;
+    transform:translateX(-50%); background:var(--red-dk); border-radius:50%;}
+  @keyframes flutter{0%,100%{transform:translate(-50%,-50%) rotate(-4deg);}50%{transform:translate(-50%,-50%) rotate(5deg);}}
+  .team{position:absolute; bottom:9%; z-index:4; text-align:center;
+    transition:transform .85s cubic-bezier(.25,.9,.3,1.15);}
+  .team-left{left:2%;} .team-right{right:2%;}
+  .pullers{display:flex; font-size:clamp(42px,7.5vw,62px); animation:idle 1.7s ease-in-out infinite;}
+  .pullers span{display:inline-block; margin:0 -5px; filter:drop-shadow(0 4px 2px rgba(0,0,0,.25));}
+  .team-left .pullers span{transform:scaleX(-1);}
+  @keyframes idle{0%,100%{translateY:0;}50%{transform:translateY(-4px);}}
+  .tag{display:inline-block; margin-top:2px; font-weight:900; font-size:11px; letter-spacing:2px;
+    color:#fff; padding:3px 10px; border-radius:20px; border:2px solid var(--ink);}
+  .tag-red{background:var(--red-dk);} .tag-blue{background:var(--blue);}
+  .team.heaveL .pullers{animation:heaveL .8s ease;}
+  .team.heaveR .pullers{animation:heaveR .8s ease;}
+  .team.cheer .pullers{animation:cheer .65s ease;}
+  .team.sad .pullers{animation:sad .7s ease;}
+  @keyframes heaveL{30%{transform:translateX(-14px) rotate(-8deg);}100%{transform:none;}}
+  @keyframes heaveR{30%{transform:translateX(14px) rotate(8deg);}100%{transform:none;}}
+  @keyframes cheer{0%,100%{transform:none;}30%{transform:translateY(-18px) rotate(-4deg);}60%{transform:translateY(-8px) rotate(4deg);}}
+  @keyframes sad{0%,100%{transform:none;}40%{transform:translateY(7px) rotate(5deg);}}
+  .stamp{position:absolute; top:26%; left:50%; z-index:6; transform:translate(-50%,-50%) rotate(-8deg) scale(0);
+    font-family:'Lilita One'; font-size:clamp(30px,6vw,52px); letter-spacing:2px; color:var(--yellow);
+    -webkit-text-stroke:2px var(--ink); text-shadow:0 5px 0 rgba(0,0,0,.25); opacity:0; pointer-events:none;}
+  .stamp.s-left{left:28%;} .stamp.s-right{left:72%;}
+  .stamp.show{animation:stampPop .8s ease forwards;}
+  @keyframes stampPop{0%{transform:translate(-50%,-50%) rotate(-8deg) scale(0);opacity:0;}
+    30%{transform:translate(-50%,-50%) rotate(-8deg) scale(1.18);opacity:1;}
+    55%{transform:translate(-50%,-50%) rotate(-8deg) scale(1);}
+    100%{transform:translate(-50%,-50%) rotate(-8deg) scale(1);opacity:0;}}
+  .spark{position:absolute; z-index:7; font-size:20px; pointer-events:none;}
+
+  /* ===== METER & KOMENTATOR ===== */
+  .meter{display:flex; align-items:center; gap:10px; padding:10px 18px;}
+  .m-label{font-weight:900; font-size:12px; letter-spacing:1px; white-space:nowrap;}
+  .m-left{color:var(--red-dk);} .m-right{color:var(--blue);}
+  .m-bar{position:relative; flex:1; height:16px; border:3px solid var(--ink); border-radius:10px; background:#fff;
+    background-image:repeating-linear-gradient(90deg, transparent 0 calc(10% - 2px), rgba(34,48,85,.25) calc(10% - 2px) 10%);}
+  .m-bar::before{content:""; position:absolute; left:50%; top:-4px; bottom:-4px; width:4px; background:var(--ink); border-radius:2px;}
+  .m-marker{position:absolute; top:-15px; left:50%; transform:translateX(-50%); font-size:20px;
+    transition:left .85s cubic-bezier(.25,.9,.3,1.15);}
+  .comment{text-align:center; padding:10px 18px; font-weight:900; font-size:15px;}
+  .comment.pop{animation:cPop .4s ease;}
+  @keyframes cPop{0%{transform:scale(.9);}60%{transform:scale(1.05);}100%{transform:scale(1);}}
+
+  /* ===== KARTU SOAL ===== */
+  .qcard{padding:22px;}
+  .qtop{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px;}
+  .qbadge{font-family:'Lilita One'; background:var(--red); color:#fff; padding:5px 14px; border-radius:10px;
+    border:3px solid var(--ink); box-shadow:0 3px 0 var(--ink); letter-spacing:1px;}
+  .qcat{font-weight:900; font-size:12px; letter-spacing:2px; background:var(--yellow);
+    border:2.5px solid var(--ink); border-radius:20px; padding:4px 12px;}
+  .qtext{font-size:clamp(17px,2.4vw,21px); font-weight:800; line-height:1.55; margin-bottom:16px;}
+  .qtext .kutip{display:block; margin-top:10px; padding:10px 14px; background:#fff8e1;
+    border-left:5px solid var(--yellow); border-radius:0 10px 10px 0; font-style:italic; font-weight:700;}
+  .opts{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .opt{display:flex; align-items:center; gap:12px; text-align:left; background:#fff; cursor:pointer;
+    border:3px solid var(--ink); border-radius:14px; padding:12px 14px; font-weight:700; font-size:15px;
+    box-shadow:0 4px 0 var(--ink); transition:.15s;}
+  .opt:not(:disabled):hover{transform:translateY(-3px); box-shadow:0 7px 0 var(--ink); background:#fffbe8;}
+  .opt:not(:disabled):active{transform:translateY(2px); box-shadow:0 1px 0 var(--ink);}
+  .opt .key{flex:0 0 32px; height:32px; display:grid; place-items:center; font-family:'Lilita One';
+    background:var(--blue); color:#fff; border-radius:50%; border:2.5px solid var(--ink);}
+  .opt.correct{background:#d9f5dd; border-color:#2f9e44; box-shadow:0 4px 0 #2f9e44;}
+  .opt.correct .key{background:#2f9e44;}
+  .opt.wrong{background:#ffe0e0; border-color:var(--red-dk); box-shadow:0 4px 0 var(--red-dk); animation:shake .4s;}
+  .opt.wrong .key{background:var(--red-dk);}
+  .opt.dim{opacity:.45;}
+  .opt:disabled{cursor:default;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+  .explain{margin-top:16px; padding:14px 16px; border-radius:12px; border:3px solid var(--ink);
+    font-size:14.5px; line-height:1.6; animation:cPop .35s ease;}
+  .explain.ok{background:#e4f8e7; border-left:8px solid #2f9e44;}
+  .explain.bad{background:#ffecec; border-left:8px solid var(--red);}
+  .explain b.verdict{font-family:'Lilita One'; letter-spacing:1px; font-size:16px;}
+  .explain .ans{display:inline-block; margin-top:6px; font-weight:900; background:#fff;
+    border:2px solid var(--ink); border-radius:8px; padding:2px 8px;}
+  .next{display:block; margin:18px auto 0; font-family:'Lilita One'; font-size:19px; letter-spacing:1px;
+    background:var(--yellow); border:3px solid var(--ink); border-radius:14px; padding:12px 30px;
+    cursor:pointer; box-shadow:0 5px 0 var(--ink); transition:.15s; animation:cPop .3s ease;}
+  .next:hover{transform:translateY(-3px) rotate(-1deg); box-shadow:0 8px 0 var(--ink);}
+  .next:active{transform:translateY(2px); box-shadow:0 1px 0 var(--ink);}
+  .hint{margin-top:12px; text-align:center; font-size:12px; font-weight:800; opacity:.6;}
+
+  /* ===== OVERLAY ===== */
+  .overlay{position:fixed; inset:0; z-index:60; background:rgba(23,33,66,.6);
+    display:grid; place-items:center; padding:18px; overflow:auto;}
+  .panel{background:var(--paper); border:4px solid var(--ink); border-radius:22px;
+    box-shadow:0 10px 0 rgba(0,0,0,.3); max-width:660px; width:100%; padding:30px 28px;
+    animation:panelIn .45s cubic-bezier(.3,1.4,.5,1);}
+  @keyframes panelIn{from{transform:translateY(36px) scale(.94); opacity:0;}to{transform:none; opacity:1;}}
+  .ribbon-label{display:inline-block; font-weight:900; font-size:11px; letter-spacing:3px; color:#fff;
+    background:var(--ink); padding:5px 14px; border-radius:20px; margin-bottom:12px;}
+  .game-title{font-family:'Lilita One'; font-size:clamp(38px,7vw,58px); line-height:1; margin-bottom:6px;}
+  .game-title .t1{color:var(--red); text-shadow:3px 3px 0 var(--ink);}
+  .game-title .t2{color:var(--blue); text-shadow:3px 3px 0 var(--ink);}
+  .subtitle{font-weight:900; font-size:14px; letter-spacing:1px; margin-bottom:18px;}
+  .subtitle span{background:var(--yellow); border:2px solid var(--ink); border-radius:8px; padding:2px 8px;}
+  .vs-row{display:flex; align-items:center; justify-content:center; gap:14px; margin:16px 0 20px; flex-wrap:wrap;}
+  .vs-card{border:3px solid var(--ink); border-radius:14px; padding:12px 20px; text-align:center;
+    box-shadow:0 5px 0 var(--ink); font-weight:900;}
+  .vs-card .big{font-size:40px; display:block;}
+  .vs-l{background:#ffe4e4; transform:rotate(-3deg);}
+  .vs-r{background:#dceeff; transform:rotate(3deg);}
+  .vs-bolt{font-family:'Lilita One'; font-size:30px; color:var(--red); text-shadow:2px 2px 0 var(--ink);}
+  .rules{list-style:none; margin:0 0 20px; display:flex; flex-direction:column; gap:9px; font-size:14.5px; font-weight:700;}
+  .rules li{background:#fff; border:2.5px solid var(--ink); border-radius:12px; padding:9px 14px;
+    box-shadow:0 3px 0 rgba(34,48,85,.35);}
+  .big-btn{display:block; width:100%; font-family:'Lilita One'; font-size:23px; letter-spacing:2px;
+    background:var(--red); color:#fff; border:4px solid var(--ink); border-radius:16px; padding:15px;
+    cursor:pointer; box-shadow:0 6px 0 var(--ink); transition:.15s; text-shadow:2px 2px 0 rgba(0,0,0,.3);}
+  .big-btn:hover{transform:translateY(-3px) rotate(-.5deg); box-shadow:0 9px 0 var(--ink); background:#f05a5f;}
+  .big-btn:active{transform:translateY(3px); box-shadow:0 1px 0 var(--ink);}
+  .big-btn.alt{background:var(--blue);}
+  .big-btn.alt:hover{background:#3e93d8;}
+  details.materi{margin-top:18px; border:3px dashed var(--ink); border-radius:14px; padding:12px 16px; background:#fffbe8;}
+  details.materi summary{font-weight:900; cursor:pointer; letter-spacing:1px;}
+  .materi-box ul{margin:10px 0 0 18px; font-size:14px; line-height:1.7; font-weight:600;}
+  .result-head{text-align:center; margin-bottom:14px;}
+  .result-emoji{font-size:74px; display:block; animation:cheer .8s ease;}
+  .result-title{font-family:'Lilita One'; font-size:clamp(28px,5.5vw,42px); margin-top:6px;}
+  .win-title{color:#2f9e44; text-shadow:3px 3px 0 var(--ink);}
+  .lose-title{color:var(--red-dk); text-shadow:3px 3px 0 var(--ink);}
+  .result-msg{text-align:center; font-weight:700; font-size:15.5px; line-height:1.6; margin-bottom:16px;}
+  .stats{display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:16px;}
+  .stat{border:3px solid var(--ink); border-radius:12px; padding:8px 16px; font-weight:900; font-size:14px;
+    box-shadow:0 3px 0 var(--ink); background:#fff;}
+  .recap{display:flex; justify-content:center; gap:8px; margin-bottom:20px;}
+  .recap .dot{width:30px; height:30px; font-size:14px;}
+  .btn-row{display:flex; gap:12px; flex-wrap:wrap;}
+  .btn-row .big-btn{flex:1; font-size:18px; padding:12px; min-width:180px;}
+  .fall-bit{position:fixed; top:-6vh; z-index:70; pointer-events:none; font-size:22px;}
+
+  @media (max-width:680px){
+    .arena{height:240px;}
+    .opts{grid-template-columns:1fr;}
+    .pullers{font-size:40px;}
+    .score{font-size:26px;}
+    .side b{font-size:12px;}
+    .topbar{padding-top:40px;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="bunting" id="bunting"></div>
+
+  <header class="topbar">
+    <div class="brand">🪢 TARIK TAMBANG LHO<small>BAHASA INDONESIA • SMK KELAS X</small></div>
+    <button id="muteBtn" title="Suara">🔊</button>
+  </header>
+
+  <main class="stage">
+
+    <div class="card scorebar">
+      <div class="side side-l"><span class="emoji">🧑‍🎓</span><b>TIM SISWA</b><span class="score" id="scoreL">0</span></div>
+      <div class="mid"><div class="dots" id="dots"></div><div class="qcount" id="qcount">SOAL 1/5</div></div>
+      <div class="side side-r"><span class="score" id="scoreR">0</span><b>TIM KOMPUTER</b><span class="emoji">🤖</span></div>
+    </div>
+
+    <div class="card arena" id="arena">
+      <div class="crowd" id="crowd"></div>
+      <div class="vline" id="vLeft" style="border-color:rgba(229,72,77,.9)"><span>🚩</span></div>
+      <div class="vline" id="vRight" style="border-color:rgba(47,127,193,.9)"><span>🏳️</span></div>
+      <div class="pit"></div>
+      <div class="center-line"></div>
+      <div class="rope" id="rope"><div class="ribbon"></div></div>
+      <div class="team team-left" id="teamLeft">
+        <div class="pullers" id="pullL"><span>🧑‍🎓</span><span>👧</span><span>👦</span></div>
+        <span class="tag tag-red">TIM SISWA</span>
+      </div>
+      <div class="team team-right" id="teamRight">
+        <div class="pullers" id="pullR"><span>🤖</span><span>🤖</span><span>🤖</span></div>
+        <span class="tag tag-blue">TIM KOMPUTER</span>
+      </div>
+      <div class="stamp" id="stamp">TARIK!</div>
+    </div>
+
+    <div class="card meter">
+      <span class="m-label m-left">◀ SISWA</span>
+      <div class="m-bar"><div class="m-marker" id="mMarker">🚩</div></div>
+      <span class="m-label m-right">KOMPUTER ▶</span>
+    </div>
+
+    <div class="card comment" id="comment">📣 Kedua tim bersiap di garis tengah…</div>
+
+    <section class="card qcard">
+      <div class="qtop"><span class="qbadge" id="qBadge">SOAL 1</span><span class="qcat" id="qCat">—</span></div>
+      <h2 class="qtext" id="qText"></h2>
+      <div class="opts" id="opts"></div>
+      <div class="explain" id="explain" hidden></div>
+      <button class="next" id="nextBtn" hidden>Lanjut ➜</button>
+      <p class="hint">💡 Tips: tekan tombol 1–4 di keyboard untuk menjawab cepat!</p>
+    </section>
+
+  </main>
+
+  <!-- LAYAR MULAI -->
+  <div class="overlay" id="startOverlay">
+    <div class="panel">
+      <span class="ribbon-label">GAME EDUKASI • LOMBA KELAS 🎪</span>
+      <h1 class="game-title"><span class="t1">TARIK</span> <span class="t2">TAMBANG!</span></h1>
+      <p class="subtitle">Materi: <span>Teks Laporan Hasil Observasi</span> — Bahasa Indonesia SMK Kelas X</p>
+      <div class="vs-row">
+        <div class="vs-card vs-l"><span class="big">🧑‍🎓</span>TIM SISWA<br><small>(Kiri)</small></div>
+        <span class="vs-bolt">VS</span>
+        <div class="vs-card vs-r"><span class="big">🤖</span>TIM KOMPUTER<br><small>(Kanan)</small></div>
+      </div>
+      <ul class="rules">
+        <li>📝 Ada <b>5 soal</b> pilihan ganda tentang Teks LHO.</li>
+        <li>✅ Jawab <b>BENAR</b> → tali tertarik ke <b>KIRI</b> (siswa menarik!).</li>
+        <li>❌ Jawab <b>SALAH</b> → tali terseret ke <b>KANAN</b> (komputer menarik!).</li>
+        <li>🏆 Jawab benar semua (atau minimal 3) → <b>TIM SISWA MENANG!</b></li>
+      </ul>
+      <button class="big-btn" id="startBtn">🎽 MULAI TARIK!</button>
+      <details class="materi"><summary>📖 Ringkasan Materi Teks LHO</summary><div class="materi-box"></div></details>
+    </div>
+  </div>
+
+  <!-- LAYAR HASIL -->
+  <div class="overlay" id="resultOverlay" hidden>
+    <div class="panel">
+      <div class="result-head">
+        <span class="result-emoji" id="resultEmoji">🏆</span>
+        <h2 class="result-title" id="resultTitle"></h2>
+      </div>
+      <p class="result-msg" id="resultMsg"></p>
+      <div class="stats">
+        <span class="stat" id="statBenar">✅ Benar: 0</span>
+        <span class="stat" id="statSalah">❌ Salah: 0</span>
+        <span class="stat" id="statPos">🪢 Posisi tali: tengah</span>
+      </div>
+      <div class="recap" id="recap"></div>
+      <div class="btn-row">
+        <button class="big-btn" id="restartBtn">🔁 MAIN LAGI</button>
+        <button class="big-btn alt" id="reviewBtn">📚 LIHAT MATERI</button>
+      </div>
+      <details class="materi" id="materiResult"><summary>📖 Ringkasan Materi Teks LHO</summary><div class="materi-box"></div></details>
+    </div>
+  </div>
+
+<script>
+/* ================= DATA SOAL ================= */
+const QUESTIONS = [
+  { cat:"Definisi",
+    q:"Teks laporan hasil observasi (LHO) adalah teks yang ...",
+    opts:["Menceritakan rangkaian peristiwa secara kronologis",
+          "Menyajikan penjabaran hasil pengamatan secara sistematis dan objektif",
+          "Mengungkapkan pendapat dan perasaan pribadi penulis",
+          "Membujuk pembaca agar menyetujui pandangan penulis"],
+    a:1,
+    info:"Teks LHO menjabarkan hasil pengamatan (observasi) terhadap suatu objek secara faktual, objektif, dan sistematis." },
+  { cat:"Struktur Teks",
+    q:"Bagian teks LHO yang berisi pembuka dan pengenalan umum tentang objek yang diamati disebut ...",
+    opts:["Deskripsi manfaat","Deskripsi bagian","Pernyataan umum","Simpulan"],
+    a:2,
+    info:"Pernyataan umum terletak di awal teks, berisi definisi atau pengenalan umum objek yang diamati." },
+  { cat:"Ciri-Ciri",
+    q:"Berikut ini yang BUKAN ciri teks laporan hasil observasi adalah ...",
+    opts:["Bersifat objektif","Ditulis berdasarkan fakta","Memuat pendapat dan kesan pribadi penulis","Disajikan secara lengkap dan sistematis"],
+    a:2,
+    info:"Teks LHO harus objektif dan faktual. Pendapat atau kesan pribadi penulis tidak boleh dimasukkan." },
+  { cat:"Analisis Struktur",
+    q:'Perhatikan kutipan berikut!<span class="kutip">“Komodo memiliki lidah panjang dan lengket untuk menangkap mangsa. Tubuhnya besar dengan kulit bersisik.”</span>Kutipan tersebut termasuk bagian ...',
+    opts:["Pernyataan umum","Deskripsi bagian","Deskripsi manfaat","Orientasi"],
+    a:1,
+    info:"Deskripsi bagian memerinci ciri-ciri objek hasil pengamatan, seperti ciri fisik, habitat, makanan, dan perilaku." },
+  { cat:"Kaidah Kebahasaan",
+    q:"Kaidah kebahasaan yang lazim digunakan dalam teks laporan hasil observasi adalah ...",
+    opts:["Kata tidak baku dan bahasa gaul","Kalimat perintah dan sapaan langsung kepada pembaca","Istilah teknis dan kata baku","Majas hiperbola yang berlebihan"],
+    a:2,
+    info:"Teks LHO menggunakan kata baku, istilah teknis sesuai topik, kalimat deskripsi, serta kalimat simpleks dan kompleks." }
+];
+
+const MATERI = `<ul>
+<li><b>Pengertian:</b> teks yang menjabarkan hasil pengamatan terhadap suatu objek secara faktual, objektif, dan sistematis.</li>
+<li><b>Struktur:</b> pernyataan umum → deskripsi bagian → deskripsi manfaat (simpulan bersifat opsional).</li>
+<li><b>Ciri-ciri:</b> berdasarkan fakta, objektif, tidak memuat pendapat pribadi, disajikan lengkap dan sistematis.</li>
+<li><b>Kebahasaan:</b> kata baku, istilah teknis, kalimat deskripsi, kalimat simpleks &amp; kompleks.</li></ul>`;
+
+/* ================= ELEMEN ================= */
+const $ = id => document.getElementById(id);
+const arena=$('arena'), rope=$('rope'), teamLeft=$('teamLeft'), teamRight=$('teamRight'),
+      pullL=$('pullL'), pullR=$('pullR'), stamp=$('stamp'), comment=$('comment'),
+      mMarker=$('mMarker'), dots=$('dots'), optsEl=$('opts'), explainEl=$('explain'),
+      nextBtn=$('nextBtn'), qText=$('qText'), qBadge=$('qBadge'), qCat=$('qCat'),
+      qcount=$('qcount'), scoreL=$('scoreL'), scoreR=$('scoreR');
+const FACES_L=["🧑‍🎓","👧","👦"], FACES_R=["🤖","🤖","🤖"], SAD="😖", HAPPY="😄";
+
+/* ================= STATE ================= */
+let order=[0,1,2,3,4], idx=0, pos=0, correct=0, wrong=0, answered=false, playing=false;
+const STEP = () => Math.max(28, Math.min(62, arena.clientWidth * 0.055));
+
+/* ================= DEKORASI ================= */
+(function buildBunting(){
+  const b=$('bunting'), colors=["#e5484d","#ffffff","#ffd447"];
+  const n=Math.ceil(window.innerWidth/40)+3;
+  for(let i=0;i<n;i++){
+    const f=document.createElement('div'); f.className='flag';
+    f.style.background=colors[i%3]; f.style.animationDelay=(i*0.15)+"s";
+    b.appendChild(f);
+  }
+})();
+(function buildCrowd(){
+  const c=$('crowd'), ppl=["🧑","👩","👨","🧕","👵","👴","🙋","🙆"];
+  for(let i=0;i<14;i++){
+    const s=document.createElement('span');
+    s.textContent=ppl[Math.floor(Math.random()*ppl.length)];
+    s.style.animationDelay=(Math.random()*1.5)+"s";
+    c.appendChild(s);
+  }
+})();
+(function buildClouds(){
+  for(let i=0;i<4;i++){
+    const c=document.createElement('div'); c.className='cloud';
+    const w=60+Math.random()*90;
+    c.style.width=w+"px"; c.style.height=(w*0.35)+"px";
+    c.style.top=(4+Math.random()*22)+"vh";
+    c.style.animationDuration=(45+Math.random()*40)+"s";
+    c.style.animationDelay=(-Math.random()*40)+"s";
+    document.body.appendChild(c);
+  }
+})();
+(function buildDots(){
+  for(let i=0;i<5;i++){const d=document.createElement('span'); d.className='dot'; dots.appendChild(d);}
+})();
+document.querySelectorAll('.materi-box').forEach(el=>el.innerHTML=MATERI);
+
+/* ================= SUARA (WebAudio) ================= */
+let AC=null, muted=false;
+function ac(){ if(!AC){ const C=window.AudioContext||window.webkitAudioContext; if(C) AC=new C(); }
+  if(AC && AC.state==='suspended') AC.resume(); return AC; }
+function tone(f,t,d,type='square',v=.12){ if(muted) return; const c=ac(); if(!c) return;
+  const o=c.createOscillator(), g=c.createGain(); o.type=type; o.frequency.value=f;
+  g.gain.setValueAtTime(v, c.currentTime+t); g.gain.exponentialRampToValueAtTime(.001, c.currentTime+t+d);
+  o.connect(g).connect(c.destination); o.start(c.currentTime+t); o.stop(c.currentTime+t+d+.05); }
+const sClick =()=>tone(880,0,.06,'triangle',.1);
+const sPull  =()=>{tone(95,0,.09,'sine',.3); tone(70,.1,.12,'sine',.3);};
+const sGood  =()=>{tone(523,0,.12,'square',.1); tone(659,.11,.12,'square',.1); tone(784,.22,.25,'triangle',.16);};
+const sBad   =()=>{tone(196,0,.22,'sawtooth',.1); tone(147,.18,.3,'sawtooth',.1);};
+const sWin   =()=>{[523,659,784,1046].forEach((f,i)=>tone(f,i*.14,.2,'triangle',.16)); tone(1318,.56,.4,'triangle',.14);};
+const sLose  =()=>{[392,330,262,196].forEach((f,i)=>tone(f,i*.18,.22,'sawtooth',.09));};
+$('muteBtn').addEventListener('click',()=>{ muted=!muted; $('muteBtn').textContent=muted?'🔇':'🔊'; });
+
+/* ================= POSISI TALI ================= */
+function updateRope(){
+  const off=pos*STEP();
+  rope.style.transform=`translateX(${off}px)`;
+  const tc=Math.max(-arena.clientWidth*0.07, Math.min(arena.clientWidth*0.07, off*0.35));
+  teamLeft.style.transform=`translateX(${tc}px)`;
+  teamRight.style.transform=`translateX(${tc}px)`;
+  mMarker.style.left=(50+pos*9)+"%";
+  const vl=$('vLeft'), vr=$('vRight'), x=5*STEP()+24;
+  vl.style.left=`calc(50% - ${x}px)`; vr.style.left=`calc(50% + ${x}px)`;
+}
+window.addEventListener('resize',updateRope);
+
+/* ================= EFEK ================= */
+function stampPop(text,side){
+  stamp.textContent=text;
+  stamp.classList.remove('show','s-left','s-right'); void stamp.offsetWidth;
+  stamp.classList.add('show', side==='left'?'s-left':'s-right');
+}
+function burst(side){
+  const rect=arena.getBoundingClientRect();
+  const x=side==='left'? rect.width*0.22 : rect.width*0.78, y=rect.height*0.5;
+  const em=side==='left'?['🎉','✨','⭐','🔴','⚪']:['⚙️','💥','🔵','✨'];
+  for(let i=0;i<12;i++){
+    const s=document.createElement('span'); s.className='spark';
+    s.textContent=em[Math.floor(Math.random()*em.length)];
+    s.style.left=x+'px'; s.style.top=y+'px'; arena.appendChild(s);
+    const dx=(Math.random()-0.5)*170, up=60+Math.random()*90;
+    s.animate([{transform:'translate(0,0) scale(.6)',opacity:1},
+               {transform:`translate(${dx*0.6}px,${-up}px) scale(1.1)`,opacity:1,offset:.45},
+               {transform:`translate(${dx}px,${70}px) scale(.9)`,opacity:0}],
+              {duration:800+Math.random()*300,easing:'cubic-bezier(.2,.7,.4,1)'}).onfinish=()=>s.remove();
+  }
+}
+function confettiRain(){
+  const bits=['🎉','🎊','⭐','🔴','⚪','🟡','🏆'];
+  for(let i=0;i<50;i++){
+    const b=document.createElement('span'); b.className='fall-bit';
+    b.textContent=bits[Math.floor(Math.random()*bits.length)];
+    b.style.left=Math.random()*100+'vw'; document.body.appendChild(b);
+    b.animate([{transform:'translateY(0) rotate(0)',opacity:1},
+               {transform:`translateY(108vh) rotate(${(Math.random()-.5)*720}deg)`,opacity:.8}],
+              {duration:2200+Math.random()*1800, delay:Math.random()*600, easing:'ease-in'}).onfinish=()=>b.remove();
+  }
+}
+function setFaces(side,sad){
+  const wrap=side==='left'?pullL:pullR, faces=side==='left'?FACES_L:FACES_R;
+  [...wrap.children].forEach((el,i)=>{
+    el.textContent=sad?SAD:(faces[i]||'🤖');
+    if(!sad && faces[i]==='🤖') el.textContent=HAPPY;
+  });
+}
+function say(t){ comment.classList.remove('pop'); void comment.offsetWidth;
+  comment.textContent=t; comment.classList.add('pop'); }
+
+/* ================= ALUR PERMAINAN ================= */
+function loadQuestion(){
+  const q=QUESTIONS[order[idx]];
+  answered=false; explainEl.hidden=true; nextBtn.hidden=true; optsEl.innerHTML='';
+  qBadge.textContent='SOAL '+(idx+1); qCat.textContent=q.cat.toUpperCase();
+  qcount.textContent='SOAL '+(idx+1)+'/5';
+  qText.innerHTML=q.q;
+  q.opts.forEach((t,i)=>{
+    const b=document.createElement('button'); b.className='opt';
+    b.innerHTML=`<span class="key">${'ABCD'[i]}</span><span>${t}</span>`;
+    b.addEventListener('click',()=>answer(i,b));
+    optsEl.appendChild(b);
+  });
+}
+function answer(i,btn){
+  if(answered||!playing) return; answered=true;
+  const q=QUESTIONS[order[idx]];
+  const btns=[...optsEl.children];
+  btns.forEach((b,j)=>{ b.disabled=true; if(j!==q.a && j!==i) b.classList.add('dim'); });
+  btns[q.a].classList.add('correct');
+  [...dots.children][idx].classList.add('done');
+  const isRight=i===q.a;
+
+  if(isRight){
+    pos--; correct++; scoreL.textContent=correct;
+    [...dots.children][idx].classList.add('ok');
+    sPull(); setTimeout(sGood,180);
+    teamLeft.classList.add('heaveL'); teamRight.classList.add('heaveR');
+    setTimeout(()=>{teamLeft.classList.remove('heaveL'); teamRight.classList.remove('heaveR');},850);
+    stampPop('TARIK! 💪','left'); burst('left');
+    setFaces('left',false); setFaces('right',true);
+    say(['🔥 TARIKAN KUAT! Siswa menjawab benar, tali bergeser ke kiri!',
+         '💪 BENAR! Tim siswa menambah tenaga, tali ke kiri!',
+         '⚡ HEBAT! Satu tarikan lagi untuk siswa!'][Math.floor(Math.random()*3)]);
+  }else{
+    btn.classList.add('wrong'); pos++; wrong++; scoreR.textContent=wrong;
+    [...dots.children][idx].classList.add('no');
+    sPull(); setTimeout(sBad,180);
+    teamRight.classList.add('heaveR'); teamLeft.classList.add('heaveL');
+    setTimeout(()=>{teamRight.classList.remove('heaveR'); teamLeft.classList.remove('heaveL');},850);
+    stampPop('HAP! 🤖','right'); burst('right');
+    setFaces('right',false); setFaces('left',true);
+    say(['🤖 YAH! Jawaban salah — komputer menarik tali ke kanan!',
+         '😬 MELESET! Tali terseret ke sisi komputer!',
+         '⚠️ Komputer mencetak poin, tali bergerak ke kanan!'][Math.floor(Math.random()*3)]);
+  }
+  updateRope();
+
+  explainEl.hidden=false;
+  explainEl.className='explain '+(isRight?'ok':'bad');
+  explainEl.innerHTML=(isRight
+    ? `<b class="verdict">✅ BENAR — TALI KE KIRI!</b><br>${q.info}`
+    : `<b class="verdict">❌ SALAH — TALI KE KANAN!</b><br>Jawaban yang benar: <span class="ans">${'ABCD'[q.a]}. ${q.opts[q.a]}</span><br>${q.info}`);
+  nextBtn.textContent=(idx===4)?'🏁 LIHAT HASIL':'LANJUT ➜';
+  nextBtn.hidden=false;
+}
+nextBtn.addEventListener('click',()=>{
+  sClick(); idx++;
+  if(idx<5){ loadQuestion(); } else { showResult(); }
+});
+function showResult(){
+  playing=false;
+  const overlay=$('resultOverlay'), title=$('resultTitle'), msg=$('resultMsg');
+  $('statBenar').textContent='✅ Benar: '+correct;
+  $('statSalah').textContent='❌ Salah: '+wrong;
+  $('statPos').textContent='🪢 Posisi tali: '+(pos<0?'di sisi SISWA':pos>0?'di sisi KOMPUTER':'di tengah');
+  const recap=$('recap'); recap.innerHTML='';
+  order.forEach((qi,i)=>{
+    const d=document.createElement('span');
+    d.className='dot '+((QUESTIONS[qi]._hit)?'ok':'no');
+    recap.appendChild(d);
+  });
+  if(pos<0){
+    $('resultEmoji').textContent='🏆';
+    title.className='result-title win-title';
+    if(correct===5){
+      title.textContent='MENANG TELAK!';
+      msg.textContent='LIMA jawaban benar semua! Tali tertarik penuh ke sisi siswa. Kamu benar-benar menguasai Teks Laporan Hasil Observasi! 🎉';
+    }else{
+      title.textContent='TIM SISWA MENANG!';
+      msg.textContent=`Siswa unggul ${correct}–${wrong}. Tali berakhir di sisi siswa. Kerja bagus — tingkatkan lagi pemahamanmu tentang teks LHO!`;
+    }
+    sWin(); confettiRain();
+  }else{
+    $('resultEmoji').textContent='🤖';
+    title.className='result-title lose-title';
+    title.textContent='TIM KOMPUTER MENANG';
+    msg.textContent=`Komputer unggul ${wrong}–${correct}. Tali terseret ke kanan. Jangan menyerah — baca ulang materi LHO, lalu tantang komputer lagi!`;
+    sLose();
+  }
+  overlay.hidden=false;
+}
+function startGame(){
+  order=[0,1,2,3,4].sort(()=>Math.random()-0.5);
+  QUESTIONS.forEach(q=>delete q._hit);
+  idx=0; pos=0; correct=0; wrong=0; playing=true;
+  scoreL.textContent='0'; scoreR.textContent='0';
+  [...dots.children].forEach(d=>d.className='dot');
+  setFaces('left',false); setFaces('right',false);
+  updateRope(); loadQuestion();
+  say('📣 Peluit berbunyi! Tarikan pertama dimulai — baca soal dengan cermat!');
+}
+$('startBtn').addEventListener('click',()=>{ ac(); sClick(); $('startOverlay').hidden=true; startGame(); });
+$('restartBtn').addEventListener('click',()=>{ sClick(); $('resultOverlay').hidden=true; startGame(); });
+$('reviewBtn').addEventListener('click',()=>{ sClick(); const d=$('materiResult'); d.open=!d.open; d.scrollIntoView({behavior:'smooth'}); });
+document.addEventListener('keydown',e=>{
+  if(!playing||answered) return;
+  const n=parseInt(e.key,10);
+  if(n>=1&&n<=4){ const b=optsEl.children[n-1]; if(b) b.click(); }
+});
+
+/* inisialisasi awal */
+updateRope(); loadQuestion();
+</script>
+</body>
+</html>
